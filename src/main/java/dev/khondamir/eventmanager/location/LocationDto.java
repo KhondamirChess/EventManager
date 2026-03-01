@@ -6,11 +6,12 @@ import jakarta.validation.constraints.NotNull;
 
 public record LocationDto (
         Long id,
-        @NotBlank
+        @NotBlank(message = "Location name must not be blank")
         String name,
-        @NotBlank
+        @NotBlank(message = "Location address must not be blank")
         String address,
-        @Min(1)
+        @NotNull(message = "Location capacity must not be null")
+        @Min(value = 1, message = "Location capacity must be at least 1")
         Integer capacity
 ){
 

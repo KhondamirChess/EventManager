@@ -5,20 +5,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class LocationEntityConverter {
     public LocationEntity toEntity(Location location) {
-        if (location.id() == null){
-            return new LocationEntity(
-                    location.name(),
-                    location.address(),
-                    location.capacity()
-            );
-        }else {
-            var entity = new LocationEntity();
-            entity.setId(location.id());
-            entity.setName(location.name());
-            entity.setAddress(location.address());
-            entity.setCapacity(location.capacity());
-            return entity;
-        }
+        LocationEntity locationEntity = new LocationEntity();
+        locationEntity.setId(location.id());
+        locationEntity.setName(location.name());
+        locationEntity.setAddress(location.address());
+        locationEntity.setCapacity(location.capacity());
+        return locationEntity;
     }
 
     public Location toDomain(LocationEntity locationEntity) {

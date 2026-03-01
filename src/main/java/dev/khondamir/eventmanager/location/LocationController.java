@@ -1,5 +1,6 @@
 package dev.khondamir.eventmanager.location;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,10 +13,7 @@ import java.util.List;
 @RequestMapping("/locations")
 public class LocationController {
     private static final Logger log = LoggerFactory.getLogger(LocationController.class);
-
-
     private final LocationService locationService;
-
     private final LocationDtoConverter locationDtoConverter;
 
     public LocationController(LocationService locationService, LocationDtoConverter locationDtoConverter) {
@@ -23,10 +21,9 @@ public class LocationController {
         this.locationDtoConverter = locationDtoConverter;
     }
 
-
     @PostMapping
     public ResponseEntity<LocationDto> createLocation(
-            @RequestBody LocationDto locationDtoToCreate
+            @Valid @RequestBody LocationDto locationDtoToCreate
     ) {
         log.info("Post request to create location: {}", locationDtoToCreate);
         var createdLocation = locationService.createLocation(
@@ -48,8 +45,8 @@ public class LocationController {
 
     @PutMapping("/{id}")
     public LocationDto updateLocation(
-            @PathVariable Long id,
-            @RequestBody LocationDto locationDtoToUpdate
+            @Valid @PathVariable("id") Long id,
+            @Valid @RequestBody LocationDto locationDtoToUpdate
     ){
         log.info("Put request to update location: {}", locationDtoToUpdate);
         var updatedLocation = locationService.updateLocation(
@@ -61,7 +58,7 @@ public class LocationController {
 
     @GetMapping("/{id}")
     public LocationDto getLocationById(
-            @PathVariable Long id
+            @PathVariable("id") Long id
     ){
         log.info("Get request to get location by Id: id={}", id);
         var foundLocation = locationService.getLocationById(id);
@@ -69,12 +66,12 @@ public class LocationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLocation(
-            @PathVariable Long id
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLocation(
+            @PathVariable("id") Long id
     ){
         log.info("Delete request to delete location: {}", id);
         locationService.deleteLocation(id);
-        return ResponseEntity.noContent().build();
     }
 
 }
