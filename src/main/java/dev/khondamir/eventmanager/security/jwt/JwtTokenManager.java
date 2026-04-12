@@ -1,5 +1,6 @@
 package dev.khondamir.eventmanager.security.jwt;
 
+import dev.khondamir.eventmanager.users.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,5 +41,23 @@ public class JwtTokenManager {
                 .parseSignedClaims(jwt)
                 .getPayload()
                 .getSubject();
+    }
+    public boolean validateToken(String token, User user) {
+        try {
+            var claims = Jwts
+                    .parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String login = claims.getSubject();
+            Date expiration = claims.getExpiration();
+
+            return login.equals(user.login()) && !expiration.before(new Date());
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -42,30 +42,47 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException, java.io.IOException {
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        log.info("Auth header: {}", authHeader);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        var jwtToken = authorizationHeader.substring(7);
+        String token = authHeader.substring(7);
 
-        String loginFromToken;
+        log.info("Token: {}", token);
         try {
-            loginFromToken = jwtTokenManager.getLoginFromToken(jwtToken);
-        }catch (Exception e){
-            log.error("Invalid JWT token", e);
-            filterChain.doFilter(request, response);
-            return;
-        }
-        User user = userService.findByLogin(loginFromToken);
+            String login = jwtTokenManager.getLoginFromToken(token);
 
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                user,
-                null,
-                List.of(new SimpleGrantedAuthority(user.role().toString()))
-        );
-        SecurityContextHolder.getContext().setAuthentication(token);
+            log.info("Login from token: {}", login);
+
+            if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                User user = userService.findByLogin(login);
+
+                if (jwtTokenManager.validateToken(token, user)) {
+
+                    var auth = new UsernamePasswordAuthenticationToken(
+                                    user,
+                                    null,
+                                    List.of(new SimpleGrantedAuthority(user.role().toString()))
+                            );
+
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+
+                    log.info("AUTH SUCCESS for user: {}", login);
+                }
+            }
+
+
+
+        } catch (Exception e) {
+            log.error("JWT ERROR: ", e);
+        }
         filterChain.doFilter(request, response);
     }
 

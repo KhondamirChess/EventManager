@@ -35,4 +35,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new UserDto(user.id(), user.login()));
     }
+
+    @PostMapping("/auth")
+    public ResponseEntity<JwtTokenResponse> authenticateUser(
+            @RequestBody @Valid SignInRequest signInRequest
+    ){
+        log.info("Get request for signin: login={}", signInRequest.login());
+        var token = authenticationService.authenticateUser(signInRequest);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new JwtTokenResponse(token));
+    }
 }

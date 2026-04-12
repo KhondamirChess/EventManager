@@ -22,9 +22,9 @@ public class UserService {
         var hashedPssword = passwordEncoder.encode(signUpRequest.password());
         var userToSave = new UserEntity(
                 null,
-                signUpRequest.login(),
-                signUpRequest.age(),
                 hashedPssword,
+                signUpRequest.age(),
+                signUpRequest.login(),
                 UserRole.USER.name()
         );
         var savedUser = userRepository.save(userToSave);
