@@ -6,10 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping ("/users")
@@ -33,7 +30,7 @@ public class UserController {
         var user = userService.registerUser(signUpRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new UserDto(user.id(), user.login()));
+                .body(new UserDto(user.id(), user.login(), user.age(), user.role()));
     }
 
     @PostMapping("/auth")
@@ -44,5 +41,13 @@ public class UserController {
         var token = authenticationService.authenticateUser(signInRequest);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new JwtTokenResponse(token));
+    }
+    @GetMapping("/{userId}")
+    public UserDto getUserById(
+            @PathVariable("userId") Long userId
+    ){
+        log.info("Get request for user: userId={}", userId);
+        var user = userService.findById(userId);
+        return new UserDto(user.id(), user.login(), user.age(), user.role());
     }
 }

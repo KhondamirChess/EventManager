@@ -45,16 +45,25 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                     authorizeRequests
                             .requestMatchers(HttpMethod.POST, "/locations")
-                            .hasAnyAuthority("USER")
+                            .hasAnyAuthority("ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/locations/**")
+                            .hasAnyAuthority("ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/locations/**")
+                            .hasAnyAuthority("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/locations/**")
                             .hasAnyAuthority("ADMIN","USER")
 
 
-
+                            .requestMatchers(HttpMethod.GET, "/users/{userId}")
+                            .hasAnyAuthority("ADMIN")
                             .requestMatchers(HttpMethod.POST, "/users")
                             .permitAll()
                             .requestMatchers(HttpMethod.POST, "/users/auth")
                             .permitAll()
+                            .requestMatchers(HttpMethod.GET, "/events/my")
+                            .hasAnyAuthority("USER")
+                            .requestMatchers("/events/registrations/**")
+                            .hasAnyAuthority("USER")
                             .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception ->

@@ -1,5 +1,6 @@
 package dev.khondamir.eventmanager.web;
 
+
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,7 @@ public class GlobalExceptionHandler {
 
     private static String constructMethodArgumentNotValidMessage(
             MethodArgumentNotValidException ex
-    ){
+    ) {
         return ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -75,4 +77,20 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(result);
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ServerErrorDto> handleForbiddenException(
+            ForbiddenException ex
+    ) {
+        log.error("Forbidden", ex);
+        var result = new ServerErrorDto(
+                "Недостаточно прав для выполнения операции",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(result);
+    }
+
 }

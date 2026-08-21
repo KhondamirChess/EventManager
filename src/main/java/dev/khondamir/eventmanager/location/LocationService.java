@@ -55,4 +55,8 @@ public class LocationService {
                         .orElseThrow(()-> new EntityNotFoundException("No location with id" + id));
         locationRepository.delete(entity);
     }
+
+    public boolean isLocationExistsById(Long id){
+        return locationRepository.existsById(id);
+    }
 }

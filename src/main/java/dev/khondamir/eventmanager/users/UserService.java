@@ -47,4 +47,10 @@ public class UserService {
                 UserRole.valueOf(userEntity.getRole())
         );
     }
+
+    public User findById(Long id) {
+        var user = userRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("User with id " + id + " not found" ));
+        return mapToDomain(user);
+    }
 }
