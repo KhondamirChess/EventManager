@@ -1,0 +1,63 @@
+package dev.khondamir.eventmanager.security.jwt;
+
+import dev.khondamir.eventmanager.users.User;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtTokenManager {
+    private final SecretKey secretKey;
+
+    private final long expirationTime;
+
+    public JwtTokenManager(
+            @Value("${jwt.secret-key}") String keyString,
+            @Value("${jwt.lifetime}") long expirationTime
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
+        this.expirationTime = expirationTime;
+    }
+
+    public String generateToken(String login) {
+        return Jwts
+                .builder()
+                .subject(login)
+                .signWith(secretKey)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .compact();
+    }
+
+    public String getLoginFromToken(String jwt) {
+        return Jwts
+                .parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload()
+                .getSubject();
+    }
+    public boolean validateToken(String token, User user) {
+        try {
+            var claims = Jwts
+                    .parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String login = claims.getSubject();
+            Date expiration = claims.getExpiration();
+
+            return login.equals(user.login()) && !expiration.before(new Date());
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
